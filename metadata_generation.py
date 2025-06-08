@@ -180,7 +180,18 @@ class MetadataGeneration:
                 float(self.micromolar_bile_acids) *
                 pd.to_numeric(bile_acids_detailed['molecular_weight'], errors='coerce')
         )
-        return BSH_compound_protein_detailed
+        BSH_compound_protein_detailed['TUDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TUDCA', 'Bile_Acid_Concentration'].values[0]
+        BSH_compound_protein_detailed['TCDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TCDCA', 'Bile_Acid_Concentration'].values[0]
+        BSH_compound_protein_detailed['TDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TDCA', 'Bile_Acid_Concentration'].values[0]
+        BSH_compound_protein_detailed['TCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TCA', 'Bile_Acid_Concentration'].values[0]
+        BSH_compound_protein_detailed['TLCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TLCA', 'Bile_Acid_Concentration'].values[0]
+        BSH_compound_protein_detailed['GUDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GUDCA', 'Bile_Acid_Concentration'].values[0]
+        BSH_compound_protein_detailed['GCDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GCDCA', 'Bile_Acid_Concentration'].values[0]
+        BSH_compound_protein_detailed['GDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GDCA', 'Bile_Acid_Concentration'].values[0]
+        BSH_compound_protein_detailed['GCA'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GCA', 'Bile_Acid_Concentration'].values[0]
+        BSH_compound_protein_detailed['GLCA'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GLCA', 'Bile_Acid_Concentration'].values[0]
+
+        BSH_compound_protein_detailed.to_csv('dataset/generated/BSH_compound_protein_bile_acid_detailed.csv', index=False)
 
 metadata = MetadataGeneration().generate_metadata()
 
