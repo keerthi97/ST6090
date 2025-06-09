@@ -132,11 +132,11 @@ class MetadataGeneration:
         seq = sequence.upper().replace(" ", "").replace("\n", "")
         analysis = ProteinAnalysis(seq)
         return {
-            "molecular_weight": analysis.molecular_weight(),
-            "aromaticity": analysis.aromaticity(),
-            "instability_index": analysis.instability_index(),
-            "isoelectric_point": analysis.isoelectric_point(),
-            "gravy": analysis.gravy(),
+            "molecular_weight": round(analysis.molecular_weight(),3),
+            "aromaticity": round(analysis.aromaticity(),3),
+            "instability_index": round(analysis.instability_index(),3),
+            "isoelectric_point": round(analysis.isoelectric_point(),3),
+            "gravy": round(analysis.gravy(),3),
             "amino_acid_percent": analysis.get_amino_acids_percent()
         }
 
