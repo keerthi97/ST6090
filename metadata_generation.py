@@ -163,18 +163,18 @@ class MetadataGeneration:
             fetch_function=self.fetch_pubchem_compound
         )
         protein_bsh_enrich= self.enrich_protein_df(protein_bsh)
-        compounds_detailed = pd.merge(compounds, self.inhibitors_data, how='left', left_on='cid', right_on='CID')
-        BSH_compound_detailed = pd.merge(self.bsh_data, compounds_detailed,  how='left', left_on='Inhibitor', right_on='CODE')
-        protein_bsh_detailed = pd.merge(protein_bsh_enrich, self.bsh_enzymes_data, how='left', left_on='accession', right_on='PROTEIN_ACCESSION_NUMBER')
-        BSH_compound_protein_detailed = pd.merge(BSH_compound_detailed, protein_bsh_detailed, how='left', left_on='BSH enzyme', right_on='BSH_ENZYME')
-        BSH_compound_protein_detailed['Inhibitor_Concentration'] = (
+        compounds_detailed = pd.merge(compounds.add_prefix('inhibitor_'), self.inhibitors_data.add_prefix('inhibitor_'), how='left', left_on='inhibitor_cid', right_on='inhibitor_CID')
+        BSH_compound_detailed = pd.merge(self.bsh_data.add_prefix('bsh_'), compounds_detailed,  how='left', left_on='bsh_Inhibitor', right_on='inhibitor_CODE')
+        protein_bsh_detailed = pd.merge(protein_bsh_enrich.add_prefix('protein_'), self.bsh_enzymes_data, how='left', left_on='protein_accession', right_on='PROTEIN_ACCESSION_NUMBER')
+        BSH_compound_protein_detailed = pd.merge(BSH_compound_detailed, protein_bsh_detailed, how='left', left_on='bsh_BSH enzyme', right_on='BSH_ENZYME')
+        BSH_compound_protein_detailed['Inhibitor_Concentration'] = round(
                 float(self.micromolar_inhibitor) *
-                pd.to_numeric(BSH_compound_protein_detailed['molecular_weight_x'], errors='coerce')
-        )
-        BSH_compound_protein_detailed['Enzyme_Protein_Concentration'] = (
+                pd.to_numeric(BSH_compound_protein_detailed['inhibitor_molecular_weight'], errors='coerce')
+        , 3)
+        BSH_compound_protein_detailed['Enzyme_Protein_Concentration'] = round(
                 float(self.micromolar_enzyme_protein) *
-                pd.to_numeric(BSH_compound_protein_detailed['molecular_weight_y'], errors='coerce')
-        )
+                pd.to_numeric(BSH_compound_protein_detailed['protein_molecular_weight'], errors='coerce')
+        , 3)
         bile_acids_detailed = pd.merge(bile_acids, self.bile_acid_data, how='left', left_on='cid', right_on='CID')
         bile_acids_detailed['Bile_Acid_Concentration'] = (
                 float(self.micromolar_bile_acids) *
