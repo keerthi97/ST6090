@@ -128,15 +128,21 @@ class MetadataGeneration:
             docsum["sequence"] = seq.findtext("GBSeq_sequence")
         return docsum
 
+    def estimate_hydrophilicity(self,gravy):
+        return round(-gravy, 3) if gravy < 0 else round(0.5 / (gravy + 0.001), 3)
+
     def analyze_protein(self, sequence):
         seq = sequence.upper().replace(" ", "").replace("\n", "")
         analysis = ProteinAnalysis(seq)
+        gravy_score = round(analysis.gravy(), 3)
         return {
             "molecular_weight": round(analysis.molecular_weight(),3),
             "aromaticity": round(analysis.aromaticity(),3),
             "instability_index": round(analysis.instability_index(),3),
             "isoelectric_point": round(analysis.isoelectric_point(),3),
-            "gravy": round(analysis.gravy(),3),
+            "gravy": gravy_score,
+            "hydrophobicity": gravy_score,
+            "hydrophilicity": self.estimate_hydrophilicity(gravy_score),
             "amino_acid_percent": analysis.get_amino_acids_percent()
         }
 
@@ -180,16 +186,6 @@ class MetadataGeneration:
                 float(self.micromolar_bile_acids) *
                 pd.to_numeric(bile_acids_detailed['molecular_weight'], errors='coerce')
         )
-        BSH_compound_protein_detailed['TUDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TUDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['TCDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TCDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['TDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['TCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['TLCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TLCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['GUDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GUDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['GCDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GCDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['GDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['GCA'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['GLCA'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GLCA', 'Bile_Acid_Concentration'].values[0]
 
         BSH_compound_protein_detailed.to_csv('dataset/generated/BSH_compound_protein_bile_acid_detailed.csv', index=False)
 
