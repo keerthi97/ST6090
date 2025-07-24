@@ -28,7 +28,7 @@ class MetadataGeneration:
         self.micromolar_bile_acids = 100
 
     def load_data(self):
-        bsh_df = pd.read_csv('dataset/Clustering_data.csv')
+        bsh_df = pd.read_csv('dataset/df_combined_with_components.csv')
         inhibitors_df = pd.read_csv('dataset/inhibitors.csv')
         bsh_enzymes_df = pd.read_csv('dataset/bsh_enzymes.csv')
         bile_acid_df = pd.read_csv('dataset/bile_acid.csv')
@@ -166,7 +166,7 @@ class MetadataGeneration:
         compounds_detailed = pd.merge(compounds.add_prefix('inhibitor_'), self.inhibitors_data.add_prefix('inhibitor_'), how='left', left_on='inhibitor_cid', right_on='inhibitor_CID')
         BSH_compound_detailed = pd.merge(self.bsh_data.add_prefix('bsh_'), compounds_detailed,  how='left', left_on='bsh_Inhibitor', right_on='inhibitor_CODE')
         protein_bsh_detailed = pd.merge(protein_bsh_enrich.add_prefix('protein_'), self.bsh_enzymes_data, how='left', left_on='protein_accession', right_on='PROTEIN_ACCESSION_NUMBER')
-        BSH_compound_protein_detailed = pd.merge(BSH_compound_detailed, protein_bsh_detailed, how='left', left_on='bsh_BSH enzyme', right_on='BSH_ENZYME')
+        BSH_compound_protein_detailed = pd.merge(BSH_compound_detailed, protein_bsh_detailed, how='left', left_on='bsh_BSH_Enzyme', right_on='BSH_ENZYME')
         BSH_compound_protein_detailed['Inhibitor_Concentration'] = round(
                 float(self.micromolar_inhibitor) *
                 pd.to_numeric(BSH_compound_protein_detailed['inhibitor_molecular_weight'], errors='coerce')
@@ -181,37 +181,53 @@ class MetadataGeneration:
                 float(self.micromolar_bile_acids) *
                 pd.to_numeric(bile_acids_detailed['molecular_weight'], errors='coerce')
         )
-        BSH_compound_protein_detailed['TUDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TUDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['TCDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TCDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['TDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['TCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['TLCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TLCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['GUDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GUDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['GCDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GCDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['GDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GDCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['GCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GCA', 'Bile_Acid_Concentration'].values[0]
-        BSH_compound_protein_detailed['GLCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GLCA', 'Bile_Acid_Concentration'].values[0]
+        # BSH_compound_protein_detailed['TUDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TUDCA', 'Bile_Acid_Concentration'].values[0]
+        # BSH_compound_protein_detailed['TCDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TCDCA', 'Bile_Acid_Concentration'].values[0]
+        # BSH_compound_protein_detailed['TDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TDCA', 'Bile_Acid_Concentration'].values[0]
+        # BSH_compound_protein_detailed['TCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TCA', 'Bile_Acid_Concentration'].values[0]
+        # BSH_compound_protein_detailed['TLCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'TLCA', 'Bile_Acid_Concentration'].values[0]
+        # BSH_compound_protein_detailed['GUDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GUDCA', 'Bile_Acid_Concentration'].values[0]
+        # BSH_compound_protein_detailed['GCDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GCDCA', 'Bile_Acid_Concentration'].values[0]
+        # BSH_compound_protein_detailed['GDCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GDCA', 'Bile_Acid_Concentration'].values[0]
+        # BSH_compound_protein_detailed['GCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GCA', 'Bile_Acid_Concentration'].values[0]
+        # BSH_compound_protein_detailed['GLCA_Concentration'] = bile_acids_detailed.loc[bile_acids_detailed['BILE_ACID'] == 'GLCA', 'Bile_Acid_Concentration'].values[0]
 
 
         original_columns = [
-            'bsh_Run', 'bsh_BSH enzyme', 'Enzyme_Protein_Concentration', 'bsh_Inhibitor',
-            'Inhibitor_Concentration', 'bsh_Replicate', 'bsh_Sample ID', 'TUDCA_Concentration',
-            'TCA_Concentration', 'TLCA_Concentration', 'GUDCA_Concentration', 'GCDCA_Concentration',
-            'GDCA_Concentration', 'GCA_Concentration', 'GLCA_Concentration', 'bsh_TUDCA', 'bsh_TCDCA',
-            'bsh_TDCA', 'bsh_TCA', 'bsh_TLCA', 'bsh_GUDCA', 'bsh_GCDCA', 'bsh_GDCA', 'bsh_GCA',
-            'bsh_GLCA', 'inhibitor_compound_canonicalized', 'inhibitor_complexity',
-            'inhibitor_h_bond_acceptor', 'inhibitor_h_bond_donor', 'inhibitor_rotatable_bonds',
-            'inhibitor_mass_exact', 'inhibitor_molecular_weight',
-            'inhibitor_polar_surface_area', 'inhibitor_weight_monoisotopic', 'protein_organism',
-            'protein_molecular_weight', 'protein_aromaticity', 'protein_instability_index',
-            'protein_isoelectric_point', 'protein_gravy', 'protein_amino_acid_percent.A',
-            'protein_amino_acid_percent.C', 'protein_amino_acid_percent.D', 'protein_amino_acid_percent.E',
-            'protein_amino_acid_percent.F', 'protein_amino_acid_percent.G', 'protein_amino_acid_percent.H',
-            'protein_amino_acid_percent.I', 'protein_amino_acid_percent.K', 'protein_amino_acid_percent.L',
-            'protein_amino_acid_percent.M', 'protein_amino_acid_percent.N', 'protein_amino_acid_percent.P',
-            'protein_amino_acid_percent.Q', 'protein_amino_acid_percent.R', 'protein_amino_acid_percent.S',
-            'protein_amino_acid_percent.T', 'protein_amino_acid_percent.V', 'protein_amino_acid_percent.W',
-            'protein_amino_acid_percent.Y'
+            'bsh_BSH_Enzyme', 'bsh_Inhibitor', 'bsh_Bile_Acid', 'bsh_Run',
+            'bsh_Replicate', 'bsh_log2_concentration', 'bsh_fitted_value',
+            'bsh_fitted_se', 'bsh_enzyme_baseline',
+            'bsh_enzyme_inhibitor_interaction', 'bsh_enzyme_bileacid_interaction',
+            'bsh_inhibitor_potency', 'bsh_ci_lwr', 'bsh_ci_upr',
+            'bsh_inhibitor_baseline', 'inhibitor_cid',
+            'inhibitor_compound_canonicalized', 'inhibitor_complexity',
+            'inhibitor_h_bond_acceptor', 'inhibitor_h_bond_donor',
+            'inhibitor_rotatable_bonds', 'inhibitor_fingerprint_substructure',
+            'inhibitor_iupac_allowed', 'inhibitor_iupac_cas',
+            'inhibitor_iupac_markup', 'inhibitor_iupac_preferred',
+            'inhibitor_iupac_systematic', 'inhibitor_iupac_traditional',
+            'inhibitor_inchi', 'inhibitor_inchikey', 'inhibitor_logp',
+            'inhibitor_mass_exact', 'inhibitor_molecular_formula',
+            'inhibitor_molecular_weight', 'inhibitor_smiles_absolute',
+            'inhibitor_smiles_canonical', 'inhibitor_smiles_isomeric',
+            'inhibitor_polar_surface_area', 'inhibitor_weight_monoisotopic',
+            'inhibitor_CODE', 'inhibitor_CID', 'protein_accession',
+            'protein_definition', 'protein_organism', 'protein_sequence',
+            'protein_molecular_weight', 'protein_aromaticity',
+            'protein_instability_index', 'protein_isoelectric_point',
+            'protein_gravy', 'protein_amino_acid_percent.A',
+            'protein_amino_acid_percent.C', 'protein_amino_acid_percent.D',
+            'protein_amino_acid_percent.E', 'protein_amino_acid_percent.F',
+            'protein_amino_acid_percent.G', 'protein_amino_acid_percent.H',
+            'protein_amino_acid_percent.I', 'protein_amino_acid_percent.K',
+            'protein_amino_acid_percent.L', 'protein_amino_acid_percent.M',
+            'protein_amino_acid_percent.N', 'protein_amino_acid_percent.P',
+            'protein_amino_acid_percent.Q', 'protein_amino_acid_percent.R',
+            'protein_amino_acid_percent.S', 'protein_amino_acid_percent.T',
+            'protein_amino_acid_percent.V', 'protein_amino_acid_percent.W',
+            'protein_amino_acid_percent.Y', 'BSH_ENZYME',
+            'PROTEIN_ACCESSION_NUMBER', 'Inhibitor_Concentration',
+            'Enzyme_Protein_Concentration'
         ]
 
 
@@ -282,7 +298,7 @@ class MetadataGeneration:
         })
 
         BSH_compound_protein_detailed = BSH_compound_protein_detailed.fillna(0)
-        columns_to_round = ['TUDCA', 'TCDCA', 'TDCA', 'TCA', 'TLCA', 'GUDCA', 'GCDCA', 'GDCA', 'GCA', 'GLCA']
+        columns_to_round = []
         BSH_compound_protein_detailed[columns_to_round] = BSH_compound_protein_detailed[columns_to_round].round(3)
 
         BSH_compound_protein_detailed = BSH_compound_protein_detailed[BSH_compound_protein_detailed['Replicate'] == 'Average']
