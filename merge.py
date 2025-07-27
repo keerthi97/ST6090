@@ -3,6 +3,7 @@ import pandas as pd
 
 df_component = pd.read_csv('dataset/merge/df_combined_with_components.csv')
 df_bsh = pd.read_csv('dataset/merge/BSH_compound_protein_bile_acid_detailed 12.csv')
+df_bsh_protein_org = pd.read_csv('dataset/merge/BSH_compound_protein_org.csv')
 
 protein_cols = [col for col in df_bsh.columns if col.startswith('Protein_')]
 inhibitor_cols = [col for col in df_bsh.columns if col.startswith('Inhibitor_')]
@@ -10,6 +11,8 @@ inhibitor_cols = [col for col in df_bsh.columns if col.startswith('Inhibitor_')]
 df_protein = df_bsh[['BSH_Enzyme'] + protein_cols].drop_duplicates()
 df_inhibitor = df_bsh[['Inhibitor'] + inhibitor_cols].drop_duplicates()
 df_inhibitor = df_inhibitor[df_inhibitor['Inhibitor'] != 'VI']
+
+df_bsh_protein_org = df_bsh_protein_org[['BSH_Enzyme', 'Protein_Organism']].drop_duplicates()
 
 properties = [
     'complexity',
@@ -33,11 +36,14 @@ for acid in Bile_Acids:
     Bile_Acid_rows.append(row)
 
 df_bile_acid = pd.DataFrame(Bile_Acid_rows)
-
+df_bile_acid_prefixed = df_bile_acid.copy()
+df_bile_acid_prefixed = df_bile_acid_prefixed.add_prefix('Bile_')
+df_bile_acid_prefixed = df_bile_acid_prefixed.rename(columns={'Bile_Bile_Acid': 'Bile_Acid'})
 
 df_protein_inhibitor_bile_acid = df_component.copy()
 df_protein_inhibitor_bile_acid = df_protein_inhibitor_bile_acid.merge(df_protein, on='BSH_Enzyme', how='left')
+df_protein_inhibitor_bile_acid = df_protein_inhibitor_bile_acid.merge(df_bsh_protein_org, on='BSH_Enzyme', how='left')
 df_protein_inhibitor_bile_acid = df_protein_inhibitor_bile_acid.merge(df_inhibitor, on='Inhibitor', how='left')
-df_protein_inhibitor_bile_acid = df_protein_inhibitor_bile_acid.merge(df_bile_acid, on='Bile_Acid', how='left')
+df_protein_inhibitor_bile_acid = df_protein_inhibitor_bile_acid.merge(df_bile_acid_prefixed, on='Bile_Acid', how='left')
 
 df_protein_inhibitor_bile_acid.to_csv('dataset/generated/df_protein_inhibitor_bile_acid.csv')
